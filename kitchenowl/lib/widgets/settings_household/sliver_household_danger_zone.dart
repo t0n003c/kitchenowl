@@ -85,7 +85,7 @@ class SliverHouseholdDangerZone extends StatelessWidget {
                             width: null,
                           );
 
-                          return BlocProvider.of<HouseholdUpdateCubit>(context)
+                          return await BlocProvider.of<HouseholdUpdateCubit>(context)
                               .importHousehold(
                             content,
                             settings,

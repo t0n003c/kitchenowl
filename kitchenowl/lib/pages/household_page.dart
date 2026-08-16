@@ -165,7 +165,7 @@ class _HouseholdPageState extends State<HouseholdPage>
             return context.go("/household");
           }
           List<ViewsEnum> pages =
-              (state.household.viewOrdering ?? ViewsEnum.values)
+              (state.household.viewOrdering ?? ViewsEnum.defaultOrdering)
                   .where((e) => e.isViewActive(state.household))
                   .toList();
 
@@ -175,13 +175,13 @@ class _HouseholdPageState extends State<HouseholdPage>
 
           if (_selectedIndex < 0 && mounted) {
             context.go(
-              "/household/${state.household.id}/${state.household.viewOrdering?.firstOrNull.toString() ?? "items"}",
+              "/household/${state.household.id}/${state.household.viewOrdering?.firstOrNull.toString() ?? "recipes"}",
             );
           }
         },
         builder: (context, state) {
           List<ViewsEnum> pages =
-              (state.household.viewOrdering ?? ViewsEnum.values)
+              (state.household.viewOrdering ?? ViewsEnum.defaultOrdering)
                   .where((e) => e.isViewActive(state.household))
                   .toList();
 

@@ -37,7 +37,7 @@ class Household extends Model {
   });
 
   factory Household.fromJson(Map<String, dynamic> map) {
-    List<ViewsEnum> viewOrdering = ViewsEnum.values;
+    List<ViewsEnum> viewOrdering = ViewsEnum.defaultOrdering;
     if (map.containsKey('view_ordering')) {
       viewOrdering = ViewsEnum.addMissing(List.from(map['view_ordering']
           .map((e) => ViewsEnum.parse(e))

@@ -253,7 +253,7 @@ final router = GoRouter(
               );
             }
             if (state.matchedLocation == state.uri.path) {
-              return "${state.matchedLocation}/${(state.extra as Household?)?.viewOrdering?.firstOrNull.toString() ?? "items"}";
+              return "${state.matchedLocation}/${(state.extra as Household?)?.viewOrdering?.firstOrNull.toString() ?? "recipes"}";
             }
 
             return null;

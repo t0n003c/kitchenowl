@@ -81,7 +81,7 @@ class MorePage extends StatelessWidget {
                 true,
             builder: (context, state) {
               List<ViewsEnum> pages =
-                  (state.household.viewOrdering ?? ViewsEnum.values)
+                  (state.household.viewOrdering ?? ViewsEnum.defaultOrdering)
                       .where((e) => e.isViewActive(state.household))
                       .skip(5)
                       .toList();
