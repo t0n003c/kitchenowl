@@ -57,7 +57,7 @@ enum OIDCProivder {
           state: res.$2,
           nonce: res.$3,
         );
-        return BlocProvider.of<AuthCubit>(context).loginOIDC(
+        return await BlocProvider.of<AuthCubit>(context).loginOIDC(
           credential.state!,
           credential.authorizationCode,
           (message) => showSnackbar(
