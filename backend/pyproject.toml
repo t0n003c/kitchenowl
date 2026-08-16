@@ -26,6 +26,7 @@ dependencies = [
     "mlxtend==0.23.1",
     "numpy>=2.2.4",
     "prometheus-flask-exporter>=0.23.2",
+    "cryptography>=50.0.0",
     "oic>=1.7.0",
     "recipe-scrapers>=15.6.0",
     "celery>=5.4.0",
