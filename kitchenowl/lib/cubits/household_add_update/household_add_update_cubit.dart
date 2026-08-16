@@ -34,7 +34,7 @@ abstract class HouseholdAddUpdateState extends Equatable {
     this.language,
     this.featurePlanner = true,
     this.featureExpenses = true,
-    this.viewOrdering = ViewsEnum.values,
+    this.viewOrdering = ViewsEnum.defaultOrdering,
     this.supportedLanguages,
   });
 

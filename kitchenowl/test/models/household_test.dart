@@ -20,6 +20,15 @@ void main() {
     // Then
     expect(h1 == h2, equals(false));
   });
+  test("Household with no saved view order should open recipes first", () {
+    final household = Household.fromJson({
+      "id": 1,
+      "name": "Name",
+      "view_ordering": [],
+    });
+
+    expect(household.viewOrdering?.first, equals(ViewsEnum.recipes));
+  });
   test("Household should de-/serialize", () {
     // Given
     final h = Household(

@@ -21,7 +21,7 @@ class HouseholdUpdateCubit
           image: household.image,
           featureExpenses: household.featureExpenses ?? true,
           featurePlanner: household.featurePlanner ?? true,
-          viewOrdering: household.viewOrdering ?? ViewsEnum.values,
+          viewOrdering: household.viewOrdering ?? ViewsEnum.defaultOrdering,
           language: household.language,
           description: household.description ?? "",
           link: household.link ?? "",
@@ -69,7 +69,7 @@ class HouseholdUpdateCubit
       name: household.name,
       featureExpenses: household.featureExpenses ?? true,
       featurePlanner: household.featurePlanner ?? true,
-      viewOrdering: household.viewOrdering ?? ViewsEnum.values,
+      viewOrdering: household.viewOrdering ?? ViewsEnum.defaultOrdering,
       language: household.language,
       image: household.image,
       shoppingLists: await shoppingLists ?? const [],
@@ -130,7 +130,7 @@ class HouseholdUpdateCubit
 
   @override
   void resetViewOrder() {
-    emit(state.copyWith(viewOrdering: ViewsEnum.values));
+    emit(state.copyWith(viewOrdering: ViewsEnum.defaultOrdering));
     saveHousehold();
   }
 
@@ -324,7 +324,7 @@ class HouseholdUpdateState extends HouseholdAddUpdateState {
     super.language,
     super.featurePlanner = true,
     super.featureExpenses = true,
-    super.viewOrdering = ViewsEnum.values,
+    super.viewOrdering = ViewsEnum.defaultOrdering,
     super.supportedLanguages,
     this.shoppingLists = const [],
     this.tags = const {},

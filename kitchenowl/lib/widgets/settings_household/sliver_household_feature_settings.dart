@@ -38,7 +38,7 @@ class SliverHouseholdFeatureSettings<
                   ),
                 ),
                 const SizedBox(height: 40),
-                if (!listEquals(state.viewOrdering, ViewsEnum.values))
+                if (!listEquals(state.viewOrdering, ViewsEnum.defaultOrdering))
                   IconButton(
                     onPressed: BlocProvider.of<Cubit>(context).resetViewOrder,
                     tooltip: AppLocalizations.of(context)!.reset,

@@ -51,7 +51,7 @@ class HouseholdAddCubit extends HouseholdAddUpdateCubit<HouseholdAddState> {
 
   @override
   void resetViewOrder() {
-    emit(state.copyWith(viewOrdering: ViewsEnum.values));
+    emit(state.copyWith(viewOrdering: ViewsEnum.defaultOrdering));
   }
 
   void removeMember(Member member) {
@@ -109,7 +109,7 @@ class HouseholdAddState extends HouseholdAddUpdateState {
     super.language,
     super.featurePlanner = true,
     super.featureExpenses = true,
-    super.viewOrdering = ViewsEnum.values,
+    super.viewOrdering = ViewsEnum.defaultOrdering,
     super.supportedLanguages,
     this.members = const [],
   });

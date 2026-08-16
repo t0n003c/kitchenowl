@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchenowl/cubits/auth_cubit.dart';
 import 'package:kitchenowl/cubits/household_list_cubit.dart';
+import 'package:kitchenowl/enums/views_enum.dart';
 import 'package:kitchenowl/kitchenowl.dart';
 import 'package:kitchenowl/models/household.dart';
 import 'package:kitchenowl/widgets/avatar_list.dart';
@@ -25,7 +26,7 @@ class HouseholdCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () => context.go(
-          '/household/${household.id}/${household.viewOrdering?.firstOrNull.toString()}',
+          '/household/${household.id}/${household.viewOrdering?.firstOrNull?.toString() ?? ViewsEnum.defaultOrdering.first.toString()}',
           extra: household,
         ),
         onLongPress: () => showModalBottomSheet<void>(

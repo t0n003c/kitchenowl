@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kitchenowl/cubits/auth_cubit.dart';
 import 'package:kitchenowl/cubits/household_add_update/household_add_cubit.dart';
 import 'package:kitchenowl/enums/update_enum.dart';
+import 'package:kitchenowl/enums/views_enum.dart';
 import 'package:kitchenowl/kitchenowl.dart';
 import 'package:kitchenowl/models/household.dart';
 import 'package:kitchenowl/models/member.dart';
@@ -175,7 +176,7 @@ class _HouseholdAddPageState extends State<HouseholdAddPage> {
                               if (!mounted || household == null) return;
                               Navigator.of(context).pop(UpdateEnum.updated);
                               context.go(
-                                '/household/${household.id}/${household.viewOrdering?.firstOrNull.toString()}',
+                                '/household/${household.id}/${household.viewOrdering?.firstOrNull?.toString() ?? ViewsEnum.defaultOrdering.first.toString()}',
                                 extra: household,
                               );
                             }

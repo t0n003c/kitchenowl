@@ -16,6 +16,16 @@ enum ViewsEnum {
   balances,
   more;
 
+  /// The default order used when a household has not customized its views.
+  /// Recipes are the primary landing view by default.
+  static const List<ViewsEnum> defaultOrdering = [
+    ViewsEnum.recipes,
+    ViewsEnum.items,
+    ViewsEnum.planner,
+    ViewsEnum.balances,
+    ViewsEnum.more,
+  ];
+
   String toLocalizedString(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
 
@@ -122,7 +132,7 @@ enum ViewsEnum {
   /// Adds all missing views
   static List<ViewsEnum> addMissing(Iterable<ViewsEnum> iterable) {
     final l = iterable.toList();
-    l.addAll(ViewsEnum.values.where((e) => !iterable.contains(e)));
+    l.addAll(defaultOrdering.where((e) => !iterable.contains(e)));
 
     return l;
   }
