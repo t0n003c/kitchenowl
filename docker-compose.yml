@@ -1,22 +1,30 @@
 services:
   front:
-    image: tombursch/kitchenowl-web:latest
+    image: ghcr.io/t0n003c/kitchenowl-web:latest
+    pull_policy: always
     restart: unless-stopped
     # environment:
     #   - BACK_URL=back:5000 # Change this if you rename the containers
     ports:
-      - "80:80"
+      - "849:80"
     depends_on:
       - back
+    networks:
+      - TinhnasNetwork
   back:
-    image: tombursch/kitchenowl-backend:latest
+    image: ghcr.io/t0n003c/kitchenowl-backend:latest
+    pull_policy: always
     restart: unless-stopped
     environment:
-      - JWT_SECRET_KEY=PLEASE_CHANGE_ME
+      - JWT_SECRET_KEY=${KITCHENOWL_JWT_SECRET:?Set KITCHENOWL_JWT_SECRET in Dockge}
       # - KITCHENOWL_MCP_ENABLED=true # Optional: enable MCP endpoint at /mcp
       # - FRONT_URL=http://localhost # Optional take a look at https://docs.kitchenowl.org/latest/self-hosting/advanced/ for more info
     volumes:
-      - kitchenowl_data:/data
+      - ${KITCHENOWL_DATA_PATH:-/volume1/docker/kitchenowl/kitchenowl_data}:/data
+    networks:
+      - TinhnasNetwork
 
-volumes:
-  kitchenowl_data:
+networks:
+  TinhnasNetwork:
+    external: true
+    name: TinhnasNetwork

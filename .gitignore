@@ -10,6 +10,7 @@
 .history
 .svn/
 .env*
+!.env.example
 
 # IntelliJ related
 *.iml
