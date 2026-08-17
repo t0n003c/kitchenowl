@@ -48,7 +48,7 @@ jobs:
           test -n "$ANDROID_STORE_PASSWORD" || { echo "ANDROID_STORE_PASSWORD is not configured" >&2; exit 1; }
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > kitchenowl-upload.jks
           {
-            printf 'storeFile=kitchenowl-upload.jks\n'
+            printf 'storeFile=../kitchenowl-upload.jks\n'
             printf 'keyAlias=%s\n' "$ANDROID_KEY_ALIAS"
             printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD"
             printf 'storePassword=%s\n' "$ANDROID_STORE_PASSWORD"
