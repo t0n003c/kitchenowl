@@ -8,6 +8,8 @@ import 'package:kitchenowl/services/transaction_handler.dart';
 import 'package:kitchenowl/services/transactions/recipe.dart';
 import 'package:kitchenowl/services/transactions/tag.dart';
 
+enum RecipeListViewMode { alphabetical, grid, shuffle }
+
 class RecipeListCubit extends Cubit<RecipeListState> {
   final Household household;
   List<Recipe> recipeList = [];
@@ -16,8 +18,11 @@ class RecipeListCubit extends Cubit<RecipeListState> {
 
   RecipeListCubit(this.household) : super(const LoadingRecipeListState()) {
     PreferenceStorage.getInstance().readBool(key: 'recipeListView').then((i) {
-      if (i != null && state.listView != i) {
-        toggleView(false);
+      if (i != null) {
+        setView(
+          i ? RecipeListViewMode.alphabetical : RecipeListViewMode.grid,
+          savePreference: false,
+        );
       }
     });
     _initialLoad();
@@ -45,12 +50,12 @@ class RecipeListCubit extends Cubit<RecipeListState> {
           ListRecipeListState(
             recipes: _state.allRecipes,
             tags: _state.tags,
-            listView: state.listView,
+            viewMode: state.viewMode,
           ),
         );
       } else {
         emit(_state.copyWith(
-          listView: state.listView,
+          viewMode: state.viewMode,
           selectedTags: selectedTags,
           recipes: _getFilteredRecipesCopy(
             _state.allRecipes,
@@ -93,7 +98,7 @@ class RecipeListCubit extends Cubit<RecipeListState> {
       emit(ListRecipeListState(
         recipes: recipeList,
         tags: await tags,
-        listView: state.listView,
+        viewMode: state.viewMode,
       ));
     }
   }
@@ -104,7 +109,7 @@ class RecipeListCubit extends Cubit<RecipeListState> {
         state is! SearchRecipeListState &&
         state is! FilteredListRecipeListState &&
         (state as ListRecipeListState).recipes.isEmpty) {
-      emit(LoadingRecipeListState(listView: state.listView));
+      emit(LoadingRecipeListState(viewMode: state.viewMode));
     }
 
     if (query != null && query.isNotEmpty) {
@@ -120,7 +125,7 @@ class RecipeListCubit extends Cubit<RecipeListState> {
         query: query,
         recipes: await recipes,
         tags: await tags,
-        listView: state.listView,
+        viewMode: state.viewMode,
       );
     } else {
       if (!runOffline && state is SearchRecipeListState) _refresh(query, true);
@@ -142,12 +147,12 @@ class RecipeListCubit extends Cubit<RecipeListState> {
               tags: await tags,
               selectedTags: filter,
               allRecipes: recipeList,
-              listView: state.listView,
+              viewMode: state.viewMode,
             )
           : ListRecipeListState(
               recipes: recipeList,
               tags: await tags,
-              listView: state.listView,
+              viewMode: state.viewMode,
             );
     }
     if (query == _refreshCurrentQuery) {
@@ -165,30 +170,48 @@ class RecipeListCubit extends Cubit<RecipeListState> {
       );
 
   void toggleView([bool savePreference = true]) {
-    if (savePreference) {
-      PreferenceStorage.getInstance()
-          .writeBool(key: 'recipeListView', value: !state.listView);
+    final nextView = switch (state.viewMode) {
+      RecipeListViewMode.alphabetical => RecipeListViewMode.grid,
+      RecipeListViewMode.grid => RecipeListViewMode.alphabetical,
+      RecipeListViewMode.shuffle => RecipeListViewMode.alphabetical,
+    };
+    setView(nextView, savePreference: savePreference);
+  }
+
+  void setView(
+    RecipeListViewMode viewMode, {
+    bool savePreference = true,
+  }) {
+    if (savePreference && viewMode != RecipeListViewMode.shuffle) {
+      PreferenceStorage.getInstance().writeBool(
+        key: 'recipeListView',
+        value: viewMode == RecipeListViewMode.alphabetical,
+      );
     }
-    emit(state.copyWith(listView: !state.listView));
+    emit(state.copyWith(viewMode: viewMode));
   }
 }
 
 abstract class RecipeListState extends Equatable {
-  final bool listView;
-  const RecipeListState({this.listView = true});
+  final RecipeListViewMode viewMode;
+  const RecipeListState({this.viewMode = RecipeListViewMode.alphabetical});
+
+  bool get listView => viewMode == RecipeListViewMode.alphabetical;
+  bool get gridView => viewMode == RecipeListViewMode.grid;
+  bool get shuffleView => viewMode == RecipeListViewMode.shuffle;
 
   @override
-  List<Object?> get props => [listView];
+  List<Object?> get props => [viewMode];
 
-  RecipeListState copyWith({bool? listView});
+  RecipeListState copyWith({RecipeListViewMode? viewMode});
 }
 
 class LoadingRecipeListState extends RecipeListState {
-  const LoadingRecipeListState({super.listView});
+  const LoadingRecipeListState({super.viewMode});
 
   @override
-  RecipeListState copyWith({bool? listView}) {
-    return LoadingRecipeListState(listView: listView ?? this.listView);
+  RecipeListState copyWith({RecipeListViewMode? viewMode}) {
+    return LoadingRecipeListState(viewMode: viewMode ?? this.viewMode);
   }
 }
 
@@ -199,16 +222,16 @@ class ListRecipeListState extends RecipeListState {
   const ListRecipeListState({
     this.recipes = const [],
     this.tags = const {},
-    super.listView,
+    super.viewMode,
   });
 
   @override
   List<Object?> get props => super.props + <Object?>[tags] + recipes;
 
   @override
-  RecipeListState copyWith({bool? listView}) {
+  RecipeListState copyWith({RecipeListViewMode? viewMode}) {
     return ListRecipeListState(
-      listView: listView ?? this.listView,
+      viewMode: viewMode ?? this.viewMode,
       recipes: recipes,
       tags: tags,
     );
@@ -224,7 +247,7 @@ class FilteredListRecipeListState extends ListRecipeListState {
     this.allRecipes = const [],
     super.recipes = const [],
     super.tags = const {},
-    super.listView,
+    super.viewMode,
   });
 
   factory FilteredListRecipeListState.fromState(
@@ -238,18 +261,18 @@ class FilteredListRecipeListState extends ListRecipeListState {
         allRecipes: state.recipes,
         tags: state.tags,
         selectedTags: {selectedTag},
-        listView: state.listView,
+        viewMode: state.viewMode,
       );
 
   @override
   FilteredListRecipeListState copyWith({
-    bool? listView,
+    RecipeListViewMode? viewMode,
     List<Recipe>? recipes,
     Set<Tag>? tags,
     Set<Tag>? selectedTags,
   }) =>
       FilteredListRecipeListState(
-        listView: listView ?? this.listView,
+        viewMode: viewMode ?? this.viewMode,
         recipes: recipes ?? this.recipes,
         tags: tags ?? this.tags,
         selectedTags: selectedTags ?? this.selectedTags,
@@ -267,16 +290,16 @@ class SearchRecipeListState extends ListRecipeListState {
     required this.query,
     super.recipes = const [],
     super.tags = const {},
-    super.listView,
+    super.viewMode,
   });
 
   @override
   List<Object?> get props => super.props + [query];
 
   @override
-  RecipeListState copyWith({bool? listView}) {
+  RecipeListState copyWith({RecipeListViewMode? viewMode}) {
     return SearchRecipeListState(
-      listView: listView ?? this.listView,
+      viewMode: viewMode ?? this.viewMode,
       query: query,
       recipes: recipes,
       tags: tags,
