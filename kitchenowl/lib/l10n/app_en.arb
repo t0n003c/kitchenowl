@@ -760,6 +760,8 @@
   "sortingAlphabetical": "Alphabetical",
   "start": "Start",
   "supportDevelopment": "Support the development",
+  "swipeShuffle": "Shuffle",
+  "@swipeShuffle": {},
   "swipeToDelete": "Swipe to delete",
   "swipeToDeleteAndLongPressToReorder": "Swipe to delete and long press to reorder",
   "swipeToRemove": "Swipe to remove",
