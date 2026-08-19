@@ -193,8 +193,12 @@ class RecipeListCubit extends Cubit<RecipeListState> {
 }
 
 abstract class RecipeListState extends Equatable {
-  final bool listView;
-  const RecipeListState({this.listView = true});
+  final RecipeListViewMode viewMode;
+  const RecipeListState({this.viewMode = RecipeListViewMode.alphabetical});
+
+  bool get listView => viewMode == RecipeListViewMode.alphabetical;
+  bool get gridView => viewMode == RecipeListViewMode.grid;
+  bool get shuffleView => viewMode == RecipeListViewMode.shuffle;
 
   @override
   List<Object?> get props => [viewMode];
