@@ -6,6 +6,7 @@ import 'package:kitchenowl/app.dart';
 import 'package:kitchenowl/cubits/recipe_list_cubit.dart';
 import 'package:kitchenowl/helpers/recipe_shuffle_deck.dart';
 import 'package:kitchenowl/kitchenowl.dart';
+import 'package:kitchenowl/models/recipe.dart';
 import 'package:kitchenowl/widgets/index_bar.dart';
 import 'package:kitchenowl/widgets/choice_scroll.dart';
 import 'package:kitchenowl/widgets/recipe_card.dart';
