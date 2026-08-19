@@ -25,7 +25,7 @@ class _RecipeListPageState extends State<RecipeListPage> {
 
   double getRowHeight() {
     if (!mounted) return 1;
-    if (BlocProvider.of<RecipeListCubit>(context).state.gridView) return 56;
+    if (!BlocProvider.of<RecipeListCubit>(context).state.gridView) return 56;
     return ((headerKey.currentContext!.size!.width - 16 - 32) / getRowCount()) /
         0.67;
   }
@@ -36,7 +36,7 @@ class _RecipeListPageState extends State<RecipeListPage> {
 
   int getRowCount() {
     if (!mounted) return 1;
-    if (BlocProvider.of<RecipeListCubit>(context).state.gridView) return 1;
+    if (!BlocProvider.of<RecipeListCubit>(context).state.gridView) return 1;
     // header width - list padding
     return ((headerKey.currentContext!.size!.width - 16 - 32) / 328).ceil();
   }
