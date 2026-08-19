@@ -11,6 +11,7 @@ import 'package:kitchenowl/widgets/index_bar.dart';
 import 'package:kitchenowl/widgets/choice_scroll.dart';
 import 'package:kitchenowl/widgets/recipe_card.dart';
 import 'package:kitchenowl/widgets/recipe_item.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class RecipeListPage extends StatefulWidget {
   const RecipeListPage({super.key});
@@ -245,6 +246,9 @@ class _RecipeListPageState extends State<RecipeListPage> {
                             recipes.map((recipe) => recipe.id).join(','),
                           ),
                           recipes: recipes,
+                          attribution: cubit.household.name.isNotEmpty
+                              ? cubit.household.name
+                              : null,
                           onUpdated: cubit.refresh,
                         ),
                       ),
@@ -349,11 +353,13 @@ IconData _viewIcon(RecipeListViewMode view) {
 
 class ShuffleRecipeView extends StatefulWidget {
   final List<Recipe> recipes;
+  final String? attribution;
   final Future<void> Function()? onUpdated;
 
   const ShuffleRecipeView({
     super.key,
     required this.recipes,
+    this.attribution,
     this.onUpdated,
   });
 
@@ -410,6 +416,17 @@ class _ShuffleRecipeViewState extends State<ShuffleRecipeView> {
           child: RecipeCard(
             recipe: recipe,
             width: double.infinity,
+            imageAspectRatio: getValueForScreenType(
+              context: context,
+              mobile: 4 / 5,
+              tablet: null,
+              desktop: null,
+            ),
+            titleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
+            attribution: widget.attribution,
             onUpdated: () {
               widget.onUpdated?.call();
             },

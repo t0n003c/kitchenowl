@@ -20,6 +20,9 @@ class RecipeCard extends StatelessWidget {
   final Future<void> Function()? onLongPressed;
   final Future<void> Function()? onAddToDate;
   final double? width;
+  final double? imageAspectRatio;
+  final TextStyle? titleStyle;
+  final String? attribution;
   final int imageFlex;
 
   const RecipeCard({
@@ -31,6 +34,9 @@ class RecipeCard extends StatelessWidget {
     this.onAddToDate,
     this.showHousehold = false,
     this.width,
+    this.imageAspectRatio,
+    this.titleStyle,
+    this.attribution,
     this.imageFlex = 5,
   });
 
@@ -83,64 +89,16 @@ class RecipeCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                flex: imageFlex,
-                child: Stack(
-                  fit: StackFit.passthrough,
-                  children: [
-                    if (recipe.image?.isNotEmpty ?? false)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(14),
-                        ),
-                        child: FadeInImage(
-                          fit: BoxFit.cover,
-                          placeholder: recipe.imageHash != null
-                              ? BlurHashImage(recipe.imageHash!)
-                              : MemoryImage(kTransparentImage) as ImageProvider,
-                          image: getImageProvider(
-                            context,
-                            recipe.image!,
-                            maxWidth: 512,
-                          ),
-                        ),
-                      ),
-                    if (recipe.image?.isEmpty ?? true)
-                      Container(
-                        decoration: BoxDecoration(
-                          color:
-                              Theme.of(context).colorScheme.secondaryContainer,
-                          borderRadius: const BorderRadius.vertical(
-                            bottom: Radius.circular(14),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.fastfood_rounded,
-                          size: 48,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer,
-                        ),
-                      ),
-                    if (recipe.time > 0)
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Chip(
-                            avatar: Icon(Icons.timer_rounded),
-                            label: Text(
-                              "${recipe.time} min",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+              if (imageAspectRatio != null)
+                AspectRatio(
+                  aspectRatio: imageAspectRatio!,
+                  child: _buildImage(context),
+                )
+              else
+                Expanded(
+                  flex: imageFlex,
+                  child: _buildImage(context),
                 ),
-              ),
               Expanded(
                 flex: 4,
                 child: Padding(
@@ -190,25 +148,36 @@ class RecipeCard extends StatelessWidget {
                         ),
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: titleStyle ??
+                            Theme.of(context).textTheme.bodyLarge,
                       ),
                       const Spacer(),
-                      if (showHousehold && recipe.household != null)
+                      if ((showHousehold && recipe.household != null) ||
+                          attribution != null)
                         Row(
                           children: [
-                            HouseholdCircleAvatar(
-                              household: recipe.household!,
-                              radius: 15,
-                            ),
+                            if (recipe.household != null)
+                              HouseholdCircleAvatar(
+                                household: recipe.household!,
+                                radius: 15,
+                              )
+                            else
+                              Icon(
+                                Icons.person_rounded,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                recipe.household!.name,
+                                AppLocalizations.of(context)!.recipeFrom(
+                                  recipe.household?.name ?? attribution!,
+                                ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
-                            if (recipe.household!.verified)
+                            if (recipe.household?.verified ?? false)
                               Icon(
                                 Icons.verified_rounded,
                                 color: Theme.of(context).colorScheme.primary,
@@ -286,6 +255,61 @@ class RecipeCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildImage(BuildContext context) {
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        if (recipe.image?.isNotEmpty ?? false)
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(14),
+            ),
+            child: FadeInImage(
+              fit: BoxFit.cover,
+              placeholder: recipe.imageHash != null
+                  ? BlurHashImage(recipe.imageHash!)
+                  : MemoryImage(kTransparentImage) as ImageProvider,
+              image: getImageProvider(
+                context,
+                recipe.image!,
+                maxWidth: 512,
+              ),
+            ),
+          ),
+        if (recipe.image?.isEmpty ?? true)
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(14),
+              ),
+            ),
+            child: Icon(
+              Icons.fastfood_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+          ),
+        if (recipe.time > 0)
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Chip(
+                avatar: Icon(Icons.timer_rounded),
+                label: Text(
+                  "${recipe.time} min",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
