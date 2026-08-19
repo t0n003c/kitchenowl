@@ -11,6 +11,7 @@ import 'package:kitchenowl/widgets/index_bar.dart';
 import 'package:kitchenowl/widgets/choice_scroll.dart';
 import 'package:kitchenowl/widgets/recipe_card.dart';
 import 'package:kitchenowl/widgets/recipe_item.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class RecipeListPage extends StatefulWidget {
   const RecipeListPage({super.key});
