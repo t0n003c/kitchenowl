@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kitchenowl/app.dart';
 import 'package:kitchenowl/cubits/recipe_list_cubit.dart';
+import 'package:kitchenowl/helpers/recipe_shuffle_deck.dart';
 import 'package:kitchenowl/kitchenowl.dart';
 import 'package:kitchenowl/widgets/index_bar.dart';
 import 'package:kitchenowl/widgets/choice_scroll.dart';
@@ -24,7 +25,7 @@ class _RecipeListPageState extends State<RecipeListPage> {
 
   double getRowHeight() {
     if (!mounted) return 1;
-    if (BlocProvider.of<RecipeListCubit>(context).state.listView) return 56;
+    if (BlocProvider.of<RecipeListCubit>(context).state.gridView) return 56;
     return ((headerKey.currentContext!.size!.width - 16 - 32) / getRowCount()) /
         0.67;
   }
@@ -35,7 +36,7 @@ class _RecipeListPageState extends State<RecipeListPage> {
 
   int getRowCount() {
     if (!mounted) return 1;
-    if (BlocProvider.of<RecipeListCubit>(context).state.listView) return 1;
+    if (BlocProvider.of<RecipeListCubit>(context).state.gridView) return 1;
     // header width - list padding
     return ((headerKey.currentContext!.size!.width - 16 - 32) / 328).ceil();
   }
@@ -106,14 +107,31 @@ class _RecipeListPageState extends State<RecipeListPage> {
               builder: (context, state) {
                 Widget header = Padding(
                   padding: const EdgeInsets.only(right: 16),
-                  child: TrailingIconTextButton(
-                    onPressed: cubit.toggleView,
-                    text: state.listView
-                        ? AppLocalizations.of(context)!.sortingAlphabetical
-                        : AppLocalizations.of(context)!.grid,
-                    icon: Icon(state.listView
-                        ? Icons.view_agenda_rounded
-                        : Icons.grid_view_rounded),
+                  child: PopupMenuButton<RecipeListViewMode>(
+                    onSelected: (view) => cubit.setView(view),
+                    itemBuilder: (context) => [
+                      for (final view in RecipeListViewMode.values)
+                        PopupMenuItem(
+                          value: view,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_viewIcon(view)),
+                              const SizedBox(width: 12),
+                              Text(_viewLabel(context, view)),
+                            ],
+                          ),
+                        ),
+                    ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(_viewLabel(context, state.viewMode)),
+                        const SizedBox(width: 4),
+                        Icon(_viewIcon(state.viewMode)),
+                        const Icon(Icons.arrow_drop_down_rounded),
+                      ],
+                    ),
                   ),
                 );
                 if (state is! ListRecipeListState ||
@@ -216,6 +234,23 @@ class _RecipeListPageState extends State<RecipeListPage> {
                   );
                 }
 
+                if (state.shuffleView) {
+                  return Column(
+                    children: [
+                      header,
+                      Expanded(
+                        child: ShuffleRecipeView(
+                          key: ValueKey(
+                            recipes.map((recipe) => recipe.id).join(','),
+                          ),
+                          recipes: recipes,
+                          onUpdated: cubit.refresh,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
                 return RefreshIndicator(
                   onRefresh: cubit.refresh,
                   child: Stack(
@@ -288,6 +323,113 @@ class _RecipeListPageState extends State<RecipeListPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+String _viewLabel(BuildContext context, RecipeListViewMode view) {
+  return switch (view) {
+    RecipeListViewMode.alphabetical =>
+      AppLocalizations.of(context)!.sortingAlphabetical,
+    RecipeListViewMode.grid => AppLocalizations.of(context)!.grid,
+    RecipeListViewMode.shuffle => AppLocalizations.of(context)!.swipeShuffle,
+  };
+}
+
+IconData _viewIcon(RecipeListViewMode view) {
+  return switch (view) {
+    RecipeListViewMode.alphabetical => Icons.view_agenda_rounded,
+    RecipeListViewMode.grid => Icons.grid_view_rounded,
+    RecipeListViewMode.shuffle => Icons.shuffle_rounded,
+  };
+}
+
+class ShuffleRecipeView extends StatefulWidget {
+  final List<Recipe> recipes;
+  final Future<void> Function()? onUpdated;
+
+  const ShuffleRecipeView({
+    super.key,
+    required this.recipes,
+    this.onUpdated,
+  });
+
+  @override
+  State<ShuffleRecipeView> createState() => _ShuffleRecipeViewState();
+}
+
+class _ShuffleRecipeViewState extends State<ShuffleRecipeView> {
+  final RecipeShuffleDeck _deck = RecipeShuffleDeck();
+  int _cycle = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _deck.setRecipes(widget.recipes);
+  }
+
+  @override
+  void didUpdateWidget(covariant ShuffleRecipeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.recipes, widget.recipes)) {
+      _deck.setRecipes(widget.recipes);
+      _cycle++;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = _deck.current;
+    if (recipe == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Dismissible(
+        key: ValueKey('shuffle-${_cycle}-${recipe.id}'),
+        direction: DismissDirection.horizontal,
+        background: _swipeBackground(
+          context,
+          Alignment.centerLeft,
+          Icons.arrow_forward_rounded,
+        ),
+        secondaryBackground: _swipeBackground(
+          context,
+          Alignment.centerRight,
+          Icons.arrow_back_rounded,
+        ),
+        onDismissed: (_) {
+          setState(() {
+            _deck.advance();
+            _cycle++;
+          });
+        },
+        child: SizedBox.expand(
+          child: RecipeCard(
+            recipe: recipe,
+            width: double.infinity,
+            onUpdated: () {
+              widget.onUpdated?.call();
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _swipeBackground(
+    BuildContext context,
+    Alignment alignment,
+    IconData icon,
+  ) {
+    return Container(
+      alignment: alignment,
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      child: Icon(
+        icon,
+        color: Theme.of(context).colorScheme.onSecondaryContainer,
       ),
     );
   }
