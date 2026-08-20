@@ -15,6 +15,7 @@ class RecipeDiscoverCubit extends Cubit<RecipeDiscoverState> {
   }
 
   Future<void> refresh() async {
+    emit(RecipeDiscoverLoadingState(household: household));
     Household? loadedHousehold = null;
     if (household != null) {
       loadedHousehold = await TransactionHandler.getInstance()

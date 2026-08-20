@@ -4,6 +4,7 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kitchenowl/cubits/household_cubit.dart';
 import 'package:kitchenowl/enums/update_enum.dart';
+import 'package:kitchenowl/helpers/url_launcher.dart';
 import 'package:kitchenowl/kitchenowl.dart';
 import 'package:kitchenowl/models/household.dart';
 import 'package:kitchenowl/models/recipe.dart';
@@ -153,10 +154,18 @@ class RecipeCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       if ((showHousehold && recipe.household != null) ||
+                          _sourceLabel(recipe) != null ||
                           attribution != null)
                         Row(
                           children: [
-                            if (recipe.household != null)
+                            if (_sourceLabel(recipe) != null)
+                              Icon(
+                                isValidUrl(recipe.source)
+                                    ? Icons.link_rounded
+                                    : Icons.person_rounded,
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                            else if (recipe.household != null)
                               HouseholdCircleAvatar(
                                 household: recipe.household!,
                                 radius: 15,
@@ -170,14 +179,17 @@ class RecipeCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 AppLocalizations.of(context)!.recipeFrom(
-                                  recipe.household?.name ?? attribution!,
+                                  _sourceLabel(recipe) ??
+                                      recipe.household?.name ??
+                                      attribution!,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
-                            if (recipe.household?.verified ?? false)
+                            if (_sourceLabel(recipe) == null &&
+                                (recipe.household?.verified ?? false))
                               Icon(
                                 Icons.verified_rounded,
                                 color: Theme.of(context).colorScheme.primary,
@@ -267,16 +279,39 @@ class RecipeCard extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(14),
             ),
-            child: FadeInImage(
-              fit: BoxFit.cover,
-              placeholder: recipe.imageHash != null
-                  ? BlurHashImage(recipe.imageHash!)
-                  : MemoryImage(kTransparentImage) as ImageProvider,
-              image: getImageProvider(
-                context,
-                recipe.image!,
-                maxWidth: 512,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final devicePixelRatio =
+                    MediaQuery.devicePixelRatioOf(context);
+                final width = constraints.maxWidth.isFinite
+                    ? constraints.maxWidth
+                    : MediaQuery.sizeOf(context).width;
+                final height = constraints.maxHeight.isFinite
+                    ? constraints.maxHeight
+                    : width;
+                final maxWidth = (width * devicePixelRatio * 1.15)
+                    .round()
+                    .clamp(512, 1536)
+                    .toInt();
+                final maxHeight = (height * devicePixelRatio * 1.15)
+                    .round()
+                    .clamp(512, 2048)
+                    .toInt();
+
+                return FadeInImage(
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                  placeholder: recipe.imageHash != null
+                      ? BlurHashImage(recipe.imageHash!)
+                      : MemoryImage(kTransparentImage) as ImageProvider,
+                  image: getImageProvider(
+                    context,
+                    recipe.image!,
+                    maxWidth: maxWidth,
+                    maxHeight: maxHeight,
+                  ),
+                );
+              },
             ),
           ),
         if (recipe.image?.isEmpty ?? true)
@@ -311,6 +346,18 @@ class RecipeCard extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  String? _sourceLabel(Recipe recipe) {
+    final source = recipe.source.trim();
+    if (source.isEmpty || source.startsWith('kitchenowl://')) return null;
+
+    final uri = Uri.tryParse(source);
+    if (uri != null && uri.host.isNotEmpty) {
+      return uri.host.replaceFirst(RegExp(r'^www\.'), '');
+    }
+
+    return source;
   }
 
   void _handleUpdate(UpdateEnum? res) {

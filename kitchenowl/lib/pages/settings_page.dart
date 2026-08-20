@@ -20,6 +20,7 @@ import 'package:kitchenowl/pages/household_update_page.dart';
 import 'package:kitchenowl/pages/reports_list_page.dart';
 import 'package:kitchenowl/pages/settings_server_user_page.dart';
 import 'package:kitchenowl/services/api/api_service.dart';
+import 'package:kitchenowl/services/app_update_service.dart';
 import 'package:kitchenowl/styles/colors.dart';
 import 'package:kitchenowl/widgets/settings/color_button.dart';
 import 'package:kitchenowl/widgets/sliver_expansion_tile.dart';
@@ -39,6 +40,14 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  late final Future<AppUpdateInfo?> _updateCheck;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateCheck = AppUpdateService.checkForUpdate();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (BlocProvider.of<AuthCubit>(context).state is! Authenticated) {
@@ -114,6 +123,41 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: Theme.of(context).textTheme.labelMedium,
                   ),
                 ),
+                if (!kIsWeb && Platform.isAndroid)
+                  FutureBuilder<AppUpdateInfo?>(
+                    future: _updateCheck,
+                    builder: (context, snapshot) {
+                      final update = snapshot.data;
+                      if (update == null) return const SizedBox.shrink();
+
+                      return Card(
+                        margin: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer,
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.system_update_rounded,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer,
+                          ),
+                          title: Text(
+                            AppLocalizations.of(context)!
+                                .appUpdateAvailable(update.version),
+                          ),
+                          subtitle: Text(
+                            AppLocalizations.of(context)!.appUpdateDownload,
+                          ),
+                          trailing: const Icon(Icons.open_in_new_rounded),
+                          onTap: () => openUrl(
+                            context,
+                            update.apkUrl ?? update.releaseUrl,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ListTile(
                   title: Text(AppLocalizations.of(context)!.themeMode),
                   leading: const Icon(Icons.nights_stay_sharp),

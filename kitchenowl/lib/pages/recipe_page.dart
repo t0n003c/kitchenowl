@@ -63,6 +63,36 @@ class _RecipePageState extends State<RecipePage> {
     super.dispose();
   }
 
+  Future<void> _addRecipeToHousehold(
+    BuildContext context,
+    RecipeState state,
+  ) async {
+    final household = state.household;
+    if (household == null || state.inHouseholdRecipe != null) return;
+
+    if (household.language == null ||
+        household.language != state.recipe.household?.language) {
+      final result = await context.push(Uri(
+        path: "/household/${household.id}/recipes/scrape",
+        queryParameters: {
+          "url": "kitchenowl:///recipe/${state.recipe.id}",
+        },
+      ).toString());
+      if (mounted && result == UpdateEnum.updated) {
+        Navigator.of(context).pop(UpdateEnum.updated);
+      }
+      return;
+    }
+
+    final recipe = await cubit.addRecipeToHousehold();
+    if (!mounted || recipe?.id == null) return;
+
+    context.go(
+      "/household/${household.id}/recipes/details/${recipe!.id!}",
+      extra: Tuple2<Household, Recipe>(household, recipe),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -330,34 +360,8 @@ class _RecipePageState extends State<RecipePage> {
                         padding: const EdgeInsets.all(16),
                         width: double.infinity,
                         child: LoadingElevatedButton(
-                          onPressed: () async {
-                            if (state.household!.language == null ||
-                                state.household!.language !=
-                                    state.recipe.household?.language) {
-                              final res = await context.push(Uri(
-                                path:
-                                    "/household/${state.household!.id}/recipes/scrape",
-                                queryParameters: {
-                                  "url":
-                                      "kitchenowl:///recipe/${state.recipe.id}"
-                                },
-                              ).toString());
-                              if (mounted &&
-                                  res != null &&
-                                  res == UpdateEnum.updated) {
-                                Navigator.of(context).pop(UpdateEnum.updated);
-                              }
-                            } else {
-                              final res = await cubit.addRecipeToHousehold();
-
-                              if (mounted && res?.id != null) {
-                                context.go(
-                                  "/household/${state.household!.id}/recipes/details/${res!.id!}",
-                                  extra: Tuple2(state.household!, res),
-                                );
-                              }
-                            }
-                          },
+                          onPressed: () =>
+                              _addRecipeToHousehold(context, state),
                           child: Text(
                             AppLocalizations.of(context)!
                                 .recipeAddToHousehold(state.household!.name),
@@ -485,6 +489,25 @@ class _RecipePageState extends State<RecipePage> {
                       imageHash: state.recipe.imageHash,
                       popValue: () => cubit.state.updateState,
                       actions: (isCollapsed) => [
+                        if (!App.isOffline &&
+                            state.household != null &&
+                            !state.isOwningHousehold &&
+                            state.inHouseholdRecipe == null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: LoadingIconButton(
+                              tooltip: AppLocalizations.of(context)!
+                                  .recipeAddToHousehold(state.household!.name),
+                              variant: state.recipe.image == null ||
+                                      state.recipe.image!.isEmpty ||
+                                      isCollapsed
+                                  ? LoadingIconButtonVariant.standard
+                                  : LoadingIconButtonVariant.filledTonal,
+                              onPressed: () =>
+                                  _addRecipeToHousehold(context, state),
+                              icon: const Icon(Icons.download_rounded),
+                            ),
+                          ),
                         if (state.recipe.visibility != RecipeVisibility.private)
                           Padding(
                             padding: const EdgeInsets.only(right: 8),

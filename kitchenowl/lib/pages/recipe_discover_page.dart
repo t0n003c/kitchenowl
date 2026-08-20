@@ -48,6 +48,21 @@ class _RecipeDiscoverPageState extends State<RecipeDiscoverPage> {
         body: BlocBuilder<RecipeDiscoverCubit, RecipeDiscoverState>(
             bloc: cubit,
             builder: (context, state) {
+              if (state is RecipeDiscoverLoadingState) {
+                return Column(
+                  children: [
+                    AppBar(
+                      title:
+                          Text(AppLocalizations.of(context)!.recipesDiscover),
+                    ),
+                    const Expanded(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ],
+                );
+              }
               if (state is RecipeDiscoverErrorState) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -61,6 +76,12 @@ class _RecipeDiscoverPageState extends State<RecipeDiscoverPage> {
                     Text(
                       AppLocalizations.of(context)!.error,
                       textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: cubit.refresh,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(AppLocalizations.of(context)!.retry),
                     ),
                     Spacer(),
                   ],
