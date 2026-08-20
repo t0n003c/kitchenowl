@@ -729,6 +729,23 @@
   "recipeGoToInHousehold": "Already added, go to recipe in {householdName}",
   "recipeImageSelect": "Select a recipe image",
   "recipeNew": "New recipe",
+  "recipeRate": "Rate this recipe",
+  "recipeRating": "Rating",
+  "recipeRatingCount": "{count, plural, =0{No ratings} =1{1 rating} other{{count} ratings}}",
+  "@recipeRatingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeReview": "Review",
+  "recipeReviews": "Reviews",
+  "recipeReviewHint": "What did you think of it?",
+  "recipeReviewDelete": "Delete your review",
+  "recipeReviewDeleteConfirmation": "Delete your rating and review?",
+  "recipeReviewSaved": "Your review was saved",
+  "recipeReviewEmpty": "No reviews yet",
   "recipeSource": "Recipe source",
   "recipes": "Recipes",
   "recipesCurated": "Curated recipes",

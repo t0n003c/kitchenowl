@@ -2,6 +2,7 @@ import 'package:fraction/fraction.dart';
 import 'package:kitchenowl/models/item.dart';
 import 'package:kitchenowl/models/model.dart';
 import 'package:kitchenowl/models/tag.dart';
+import 'package:kitchenowl/models/recipe_review.dart';
 
 import 'household.dart';
 
@@ -25,6 +26,11 @@ class Recipe extends Model {
   final RecipeVisibility visibility;
   final int? householdId;
   final bool curated;
+  final double ratingAverage;
+  final int ratingCount;
+  final int? myRating;
+  final String myReview;
+  final List<RecipeReview> reviews;
 
   /// The household this recipe belongs to, the contained field is not complete and should only be used for external recipes
   final Household? household;
@@ -48,6 +54,11 @@ class Recipe extends Model {
     this.householdId,
     this.household,
     this.curated = false,
+    this.ratingAverage = 0,
+    this.ratingCount = 0,
+    this.myRating,
+    this.myReview = '',
+    this.reviews = const [],
   });
 
   factory Recipe.fromJson(Map<String, dynamic> map) {
@@ -61,6 +72,13 @@ class Recipe extends Model {
     }
 
     Set<DateTime> plannedCookingDates = {};
+
+    List<RecipeReview> reviews = const [];
+    if (map['reviews'] is List) {
+      reviews = List.from(
+        map['reviews'].map((e) => RecipeReview.fromJson(e)),
+      );
+    }
 
     if (map.containsKey('planned_cooking_dates') &&
         map['planned_cooking_dates'] is List) {
@@ -96,6 +114,11 @@ class Recipe extends Model {
           ? Household.fromJson(map['household'])
           : null,
       curated: map['server_curated'] ?? false,
+      ratingAverage: (map['rating_average'] ?? 0).toDouble(),
+      ratingCount: map['rating_count'] ?? 0,
+      myRating: map['my_rating'],
+      myReview: map['my_review'] ?? '',
+      reviews: reviews,
     );
   }
 
@@ -115,6 +138,11 @@ class Recipe extends Model {
     Set<DateTime>? plannedCookingDates,
     int? householdId,
     bool? curated,
+    double? ratingAverage,
+    int? ratingCount,
+    int? myRating,
+    String? myReview,
+    List<RecipeReview>? reviews,
   }) =>
       Recipe(
         id: id,
@@ -135,6 +163,11 @@ class Recipe extends Model {
         visibility: visibility ?? this.visibility,
         householdId: householdId ?? this.householdId,
         household: this.household,
+        ratingAverage: ratingAverage ?? this.ratingAverage,
+        ratingCount: ratingCount ?? this.ratingCount,
+        myRating: myRating ?? this.myRating,
+        myReview: myReview ?? this.myReview,
+        reviews: reviews ?? this.reviews,
       );
 
   Recipe withYields(int? yields) {
@@ -167,6 +200,11 @@ class Recipe extends Model {
         householdId,
         household,
         curated,
+        ratingAverage,
+        ratingCount,
+        myRating,
+        myReview,
+        reviews,
       ];
 
   @override

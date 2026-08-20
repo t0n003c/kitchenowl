@@ -10,6 +10,8 @@ Welcome to the documentation of [KitchenOwl](https://kitchenowl.org).
 If you want to contribute or set up a self-hosted instance of KitchenOwl you're at the right place. 
 Otherwise, you can find general information and features on the [main website](https://kitchenowl.org).
 
+For household recipe ratings and reviews, see the [recipe ratings and reviews reference](reference/recipe-ratings.md).
+
 <div class="grid cards" markdown>
 
 -   :material-rocket-launch: &nbsp;

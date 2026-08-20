@@ -15,6 +15,7 @@ import 'package:kitchenowl/pages/item_page.dart';
 import 'package:kitchenowl/pages/item_search_page.dart';
 import 'package:kitchenowl/kitchenowl.dart';
 import 'package:kitchenowl/widgets/recipe_time_settings.dart';
+import 'package:kitchenowl/widgets/rich_text_editor.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:tuple/tuple.dart';
 
@@ -38,7 +39,6 @@ class AddUpdateRecipePage extends StatefulWidget {
 
 class _AddUpdateRecipePageState extends State<AddUpdateRecipePage> {
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController descController = TextEditingController();
   final TextEditingController yieldsController = TextEditingController();
   final TextEditingController sourceController = TextEditingController();
   late final AddUpdateRecipeCubit cubit;
@@ -50,7 +50,6 @@ class _AddUpdateRecipePageState extends State<AddUpdateRecipePage> {
     super.initState();
     isUpdate = widget.recipe.id != null;
     nameController.text = widget.recipe.name;
-    descController.text = widget.recipe.description;
     if (widget.recipe.yields > 0) {
       yieldsController.text = widget.recipe.yields.toString();
     }
@@ -68,7 +67,6 @@ class _AddUpdateRecipePageState extends State<AddUpdateRecipePage> {
   void dispose() {
     cubit.close();
     nameController.dispose();
-    descController.dispose();
     yieldsController.dispose();
     sourceController.dispose();
     super.dispose();
@@ -89,8 +87,6 @@ class _AddUpdateRecipePageState extends State<AddUpdateRecipePage> {
           listener: (context, state) {
             if (nameController.text != state.name)
               nameController.text = state.name;
-            if (descController.text != state.description)
-              descController.text = state.description;
             if (yieldsController.text != state.yields.toString() &&
                 state.yields > 0)
               yieldsController.text = state.yields.toString();
@@ -500,35 +496,31 @@ class _AddUpdateRecipePageState extends State<AddUpdateRecipePage> {
                                 );
                               },
                             ),
-                            BlocListener<AddUpdateRecipeCubit,
-                                AddUpdateRecipeState>(
-                              bloc: cubit,
-                              listenWhen: (previous, current) =>
-                                  previous.description != current.description,
-                              listener: (context, state) {
-                                if (descController.text != state.description) {
-                                  descController.text = state.description;
-                                }
-                              },
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                                child: TextField(
-                                  controller: descController,
-                                  onChanged: cubit.setDescription,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  maxLines: null,
-                                  decoration: InputDecoration(
-                                    border: const OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(14)),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: BlocBuilder<AddUpdateRecipeCubit,
+                                  AddUpdateRecipeState>(
+                                bloc: cubit,
+                                buildWhen: (previous, current) =>
+                                    previous.description !=
+                                    current.description,
+                                builder: (context, state) => Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.description,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
                                     ),
-                                    labelText: AppLocalizations.of(context)!
-                                        .description,
-                                    hintText: AppLocalizations.of(context)!
-                                        .writeMarkdownHere,
-                                  ),
+                                    const SizedBox(height: 8),
+                                    RichTextEditor(
+                                      value: state.description,
+                                      onChanged: cubit.setDescription,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

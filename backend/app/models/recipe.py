@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 Model = db.Model
 if TYPE_CHECKING:
-    from app.models import Household, RecipeHistory, File, Report
+    from app.models import Household, RecipeHistory, File, Report, RecipeReview
     from app.helpers.db_model_base import DbModelBase
 
     Model = DbModelBase
@@ -132,6 +132,17 @@ class Recipe(Model, DbModelAuthorizeMixin):
         ),
     )
 
+    reviews: Mapped[List["RecipeReview"]] = cast(
+        Mapped[List["RecipeReview"]],
+        db.relationship(
+            "RecipeReview",
+            back_populates="recipe",
+            cascade="all, delete-orphan",
+            lazy="selectin",
+            order_by="RecipeReview.created_at.desc()",
+        ),
+    )
+
     def obj_to_dict(
         self,
         skip_columns: list[str] | None = None,
@@ -151,6 +162,10 @@ class Recipe(Model, DbModelAuthorizeMixin):
         if self.photo_file:
             res["photo_hash"] = self.photo_file.blur_hash
 
+        ratings = [review.rating for review in self.reviews]
+        res["rating_count"] = len(ratings)
+        res["rating_average"] = round(sum(ratings) / len(ratings), 2) if ratings else 0
+
         for column_name in skip_columns or []:
             if column_name in res:
                 del res[column_name]
@@ -165,6 +180,16 @@ class Recipe(Model, DbModelAuthorizeMixin):
         res["items"] = [e.obj_to_item_dict() for e in self.items]
         res["tags"] = [e.obj_to_item_dict() for e in self.tags]
         res["household"] = self.household.obj_to_public_dict()
+        res["reviews"] = [review.obj_to_dict() for review in self.reviews]
+
+        from flask_jwt_extended import current_user
+
+        current_review = next(
+            (review for review in self.reviews if current_user and review.user_id == current_user.id),
+            None,
+        )
+        res["my_rating"] = current_review.rating if current_review else None
+        res["my_review"] = current_review.review if current_review else ""
 
         for column_name in skip_columns or []:
             if column_name in res:
@@ -181,6 +206,9 @@ class Recipe(Model, DbModelAuthorizeMixin):
                 "suggestion_rank",
             ]
         )
+        res.pop("reviews", None)
+        res.pop("my_rating", None)
+        res.pop("my_review", None)
         return res
 
     def obj_to_export_dict(self) -> dict[str, Any]:

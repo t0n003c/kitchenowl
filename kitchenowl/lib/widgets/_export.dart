@@ -29,6 +29,7 @@ export 'number_selector.dart';
 export 'loading_list_tile.dart';
 export 'loading_elevated_button_icon.dart';
 export 'loading_filled_button.dart';
+export 'recipe_reviews.dart';
 export 'kitchenowl_search_anchor.dart';
 export 'kitchenowl_persistent_search_anchor.dart';
 export 'kitchenowl_markdown_body.dart';

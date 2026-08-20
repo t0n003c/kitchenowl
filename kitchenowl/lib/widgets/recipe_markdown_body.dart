@@ -5,10 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:kitchenowl/cubits/recipe_cubit.dart';
 import 'package:kitchenowl/helpers/recipe_item_markdown_extension.dart';
+import 'package:kitchenowl/helpers/rich_text_document.dart';
 import 'package:kitchenowl/helpers/short_image_markdown_extension.dart';
 import 'package:kitchenowl/kitchenowl.dart';
 import 'package:kitchenowl/models/recipe.dart';
 import 'package:kitchenowl/widgets/kitchenowl_markdown_builder.dart';
+import 'package:kitchenowl/widgets/rich_text_preview.dart';
 import 'package:markdown/markdown.dart' as md;
 
 class RecipeMarkdownBody extends StatelessWidget {
@@ -71,6 +73,10 @@ class RecipeMarkdownBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (RichTextDocument.isRichText(recipe.description)) {
+      return RichTextPreview(value: recipe.description);
+    }
+
     md.ExtensionSet extensionSet = md.ExtensionSet(
       md.ExtensionSet.gitHubWeb.blockSyntaxes,
       md.ExtensionSet.gitHubWeb.inlineSyntaxes +

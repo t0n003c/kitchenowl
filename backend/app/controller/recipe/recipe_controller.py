@@ -1,12 +1,13 @@
 import re
 from sqlalchemy import desc, func
 from app.config import FRONT_URL
-from app.errors import NotFoundRequest
-from app.models import Household, RecipeItems, RecipeTags
+from app.errors import InvalidUsage, NotFoundRequest
+from app.models import Household, RecipeItems, RecipeTags, RecipeReview
 from flask import jsonify, Blueprint
 from flask_jwt_extended import current_user, jwt_required
 from app import db
 from app.helpers import validate_args, authorize_household
+from app.helpers.rich_text import MAX_REVIEW_PLAIN_TEXT_LENGTH, plain_text_length
 from app.models import Recipe, Item, Tag
 from app.models.recipe import RecipeVisibility
 from app.service.file_has_access_or_download import file_has_access_or_download
@@ -19,6 +20,7 @@ from .schemas import (
     GetAllFilterRequest,
     ScrapeRecipe,
     SuggestionsRecipe,
+    RecipeReviewRequest,
 )
 
 recipe = Blueprint("recipe", __name__)
@@ -209,6 +211,61 @@ def deleteRecipeById(id):
     recipe.checkAuthorized()
     recipe.delete()
     return jsonify({"msg": "DONE"})
+
+
+@recipe.route("/<int:id>/review", methods=["POST"])
+@jwt_required()
+@validate_args(RecipeReviewRequest)
+def addOrUpdateRecipeReview(args, id):
+    recipe = Recipe.find_by_id(id)
+    if not recipe:
+        raise NotFoundRequest()
+    recipe.checkAuthorized()
+
+    try:
+        review_length = plain_text_length(args["review"])
+    except ValueError as exc:
+        raise InvalidUsage("Invalid rich text review") from exc
+    if review_length > MAX_REVIEW_PLAIN_TEXT_LENGTH:
+        raise InvalidUsage("Review is too long")
+
+    review = RecipeReview.query.filter_by(
+        recipe_id=recipe.id,
+        user_id=current_user.id,
+    ).first()
+    if review is None:
+        review = RecipeReview(
+            recipe=recipe,
+            user_id=current_user.id,
+            rating=args["rating"],
+            review=args["review"].strip(),
+        )
+        db.session.add(review)
+    else:
+        review.rating = args["rating"]
+        review.review = args["review"].strip()
+
+    db.session.commit()
+    return jsonify(recipe.obj_to_full_dict())
+
+
+@recipe.route("/<int:id>/review", methods=["DELETE"])
+@jwt_required()
+def deleteRecipeReview(id):
+    recipe = Recipe.find_by_id(id)
+    if not recipe:
+        raise NotFoundRequest()
+    recipe.checkAuthorized()
+
+    review = RecipeReview.query.filter_by(
+        recipe_id=recipe.id,
+        user_id=current_user.id,
+    ).first()
+    if review:
+        db.session.delete(review)
+        db.session.commit()
+
+    return jsonify(recipe.obj_to_full_dict())
 
 
 @recipeHousehold.route("/search", methods=["GET"])

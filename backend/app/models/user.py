@@ -20,6 +20,7 @@ if TYPE_CHECKING:
         OIDCLink,
         OIDCRequest,
         Report,
+        RecipeReview,
     )
     from app.helpers.db_model_base import DbModelBase
 
@@ -145,6 +146,15 @@ class User(Model):
             "Report",
             foreign_keys="[Report.user_id]",
             back_populates="user",
+        ),
+    )
+
+    recipe_reviews: Mapped[List["RecipeReview"]] = cast(
+        Mapped[List["RecipeReview"]],
+        db.relationship(
+            "RecipeReview",
+            back_populates="user",
+            cascade="all, delete-orphan",
         ),
     )
 

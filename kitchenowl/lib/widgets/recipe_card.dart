@@ -152,6 +152,30 @@ class RecipeCard extends StatelessWidget {
                         style: titleStyle ??
                             Theme.of(context).textTheme.bodyLarge,
                       ),
+                      if (recipe.ratingCount > 0) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            ...List.generate(
+                              5,
+                              (index) => Icon(
+                                recipe.ratingAverage >= index + 1
+                                    ? Icons.star_rounded
+                                    : recipe.ratingAverage >= index + 0.5
+                                        ? Icons.star_half_rounded
+                                        : Icons.star_border_rounded,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              recipe.ratingAverage.toStringAsFixed(1),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ],
                       const Spacer(),
                       if ((showHousehold && recipe.household != null) ||
                           _sourceLabel(recipe) != null ||

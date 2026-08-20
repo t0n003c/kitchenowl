@@ -99,6 +99,30 @@ extension RecipeApi on ApiService {
     return res.statusCode == 200;
   }
 
+  Future<Recipe?> saveRecipeReview(
+    Recipe recipe, {
+    required int rating,
+    required String review,
+  }) async {
+    final res = await post(
+      '$baseRoute/${recipe.id}/review',
+      jsonEncode({
+        'rating': rating,
+        'review': review,
+      }),
+    );
+    if (res.statusCode != 200) return null;
+
+    return Recipe.fromJson(jsonDecode(res.body));
+  }
+
+  Future<Recipe?> deleteRecipeReview(Recipe recipe) async {
+    final res = await delete('$baseRoute/${recipe.id}/review');
+    if (res.statusCode != 200) return null;
+
+    return Recipe.fromJson(jsonDecode(res.body));
+  }
+
   Future<(RecipeScrape?, int)> scrapeRecipe(
       Household household, String url) async {
     final res = await post(
