@@ -143,4 +143,4 @@ def test_recipe_review_rejects_invalid_rating(
         f"/api/recipe/{recipe_with_items}/review",
         json={"rating": 6},
     )
-    assert response.status_code == 422
+    assert response.status_code == 400
