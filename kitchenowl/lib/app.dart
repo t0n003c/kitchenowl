@@ -213,11 +213,24 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                 }
 
                 return MaterialApp.router(
-                  builder: (context, child) =>
-                      AnnotatedRegion<SystemUiOverlayStyle>(
-                    value: _getSystemUI(context, state),
-                    child: child ?? const SizedBox(),
-                  ),
+                  builder: (context, child) {
+                    final mediaQuery = MediaQuery.of(context);
+                    final systemTextScale =
+                        mediaQuery.textScaler.scale(1.0);
+                    return MediaQuery(
+                      data: mediaQuery.copyWith(
+                        textScaler: TextScaler.linear(
+                          (systemTextScale * state.textScale)
+                              .clamp(0.7, 2.5)
+                              .toDouble(),
+                        ),
+                      ),
+                      child: AnnotatedRegion<SystemUiOverlayStyle>(
+                        value: _getSystemUI(context, state),
+                        child: child ?? const SizedBox(),
+                      ),
+                    );
+                  },
                   onGenerateTitle: (BuildContext context) =>
                       AppLocalizations.of(context)!.appTitle,
                   localizationsDelegates:

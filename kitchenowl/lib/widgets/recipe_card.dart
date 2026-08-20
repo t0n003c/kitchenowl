@@ -173,6 +173,38 @@ class RecipeCard extends StatelessWidget {
                               recipe.ratingAverage.toStringAsFixed(1),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                AppLocalizations.of(context)!
+                                    .recipeRatingCount(recipe.ratingCount),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (onLongPressed == null &&
+                          (recipe.prepTime > 0 || recipe.cookTime > 0)) ...[
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 2,
+                          children: [
+                            if (recipe.prepTime > 0)
+                              _RecipeMeta(
+                                icon: Icons.restaurant_rounded,
+                                label:
+                                    '${AppLocalizations.of(context)!.preparationTime}: ${recipe.prepTime} ${AppLocalizations.of(context)!.minutesAbbrev}',
+                              ),
+                            if (recipe.cookTime > 0)
+                              _RecipeMeta(
+                                icon: Icons.local_fire_department_rounded,
+                                label:
+                                    '${AppLocalizations.of(context)!.cookingTime}: ${recipe.cookTime} ${AppLocalizations.of(context)!.minutesAbbrev}',
+                              ),
                           ],
                         ),
                       ],
@@ -389,5 +421,33 @@ class RecipeCard extends StatelessWidget {
         (res == UpdateEnum.updated || res == UpdateEnum.deleted)) {
       onUpdated!();
     }
+  }
+}
+
+class _RecipeMeta extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _RecipeMeta({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+      ],
+    );
   }
 }

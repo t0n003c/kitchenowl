@@ -33,6 +33,8 @@ class SettingsCubit extends Cubit<SettingsState> {
         .readBool(key: 'restoreLastShoppingList');
     final shoppingListKeepAwake = PreferenceStorage.getInstance()
         .readBool(key: 'shoppingListKeepAwake');
+    final textScale =
+        PreferenceStorage.getInstance().readDouble(key: 'appTextScale');
 
     Config.deviceInfo = DeviceInfoPlugin().deviceInfo;
     Config.packageInfo = PackageInfo.fromPlatform();
@@ -59,6 +61,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       recentItemsCategorize: await recentItemsCategorize ?? false,
       restoreLastShoppingList: await restoreLastShoppingList ?? false,
       shoppingListKeepAwake: await shoppingListKeepAwake ?? false,
+      textScale: (await textScale ?? 1.0).clamp(0.85, 1.5).toDouble(),
     ));
   }
 
@@ -142,6 +145,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     );
     emit(state.copyWith(shoppingListKeepAwake: shoppingListKeepAwake));
   }
+
+  void setTextScale(double textScale) {
+    final value = textScale.clamp(0.85, 1.5).toDouble();
+    PreferenceStorage.getInstance().writeDouble(
+      key: 'appTextScale',
+      value: value,
+    );
+    emit(state.copyWith(textScale: value));
+  }
 }
 
 class SettingsState extends Equatable {
@@ -156,6 +168,7 @@ class SettingsState extends Equatable {
   final bool recentItemsCategorize;
   final bool restoreLastShoppingList;
   final bool shoppingListKeepAwake;
+  final double textScale;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -169,6 +182,7 @@ class SettingsState extends Equatable {
     this.recentItemsCategorize = false,
     this.restoreLastShoppingList = false,
     this.shoppingListKeepAwake = false,
+    this.textScale = 1.0,
   });
 
   SettingsState copyWith({
@@ -183,6 +197,7 @@ class SettingsState extends Equatable {
     bool? recentItemsCategorize,
     bool? restoreLastShoppingList,
     bool? shoppingListKeepAwake,
+    double? textScale,
   }) =>
       SettingsState(
         themeMode: themeMode ?? this.themeMode,
@@ -200,6 +215,7 @@ class SettingsState extends Equatable {
             restoreLastShoppingList ?? this.restoreLastShoppingList,
         shoppingListKeepAwake:
             shoppingListKeepAwake ?? this.shoppingListKeepAwake,
+        textScale: textScale ?? this.textScale,
       );
 
   @override
@@ -215,5 +231,6 @@ class SettingsState extends Equatable {
         recentItemsCategorize,
         restoreLastShoppingList,
         shoppingListKeepAwake,
+        textScale,
       ];
 }
