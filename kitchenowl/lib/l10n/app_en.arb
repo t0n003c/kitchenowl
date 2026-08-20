@@ -511,6 +511,15 @@
   "@yields": {},
   "@you": {},
   "about": "About",
+  "appUpdateAvailable": "New app version {version} available",
+  "@appUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appUpdateDownload": "Tap to download the update",
   "accountCreate": "Create account",
   "accountCreateHint": "Your username and name are public, so pick something you're comfortable sharing with others.",
   "accountCreateTitle": "Create your KitchenOwl account",
@@ -739,6 +748,7 @@
   "reportRecipe": "Report recipe",
   "reportUser": "Report user",
   "reset": "Reset",
+  "retry": "Retry",
   "save": "Save",
   "search": "Search",
   "searchHint": "Looking for something?",
