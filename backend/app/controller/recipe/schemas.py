@@ -1,4 +1,4 @@
-from marshmallow import EXCLUDE, fields, Schema
+from marshmallow import EXCLUDE, fields, Schema, validate
 
 
 class AddRecipe(Schema):
@@ -83,3 +83,8 @@ class ScrapeRecipe(Schema):
 
 class SuggestionsRecipe(Schema):
     language = fields.String()
+
+
+class RecipeReviewRequest(Schema):
+    rating = fields.Integer(required=True, validate=validate.Range(min=1, max=5))
+    review = fields.String(load_default="", validate=validate.Length(max=2000))

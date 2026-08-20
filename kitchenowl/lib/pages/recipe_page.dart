@@ -288,6 +288,14 @@ class _RecipePageState extends State<RecipePage> {
                     onLongPressed:
                         const Nullable<void Function(RecipeItem)>.empty(),
                   ),
+                if (state.isOwningHousehold && !App.isOffline)
+                  SliverToBoxAdapter(
+                    child: RecipeReviews(
+                      recipe: state.recipe,
+                      canReview: true,
+                      onChanged: cubit.refresh,
+                    ),
+                  ),
               ]),
               footer: Container(
                 color: Theme.of(context).colorScheme.surface,

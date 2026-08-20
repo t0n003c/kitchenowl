@@ -97,3 +97,50 @@ def test_recipe_deletion(user_client_with_household, recipe_with_items):
     # Verify deletion
     response = user_client_with_household.get(f"/api/recipe/{recipe_id}")
     assert response.status_code != 200  # Should not be found
+
+
+def test_recipe_review_create_update_and_delete(
+    user_client_with_household, recipe_with_items
+):
+    recipe_id = recipe_with_items
+
+    response = user_client_with_household.post(
+        f"/api/recipe/{recipe_id}/review",
+        json={"rating": 5, "review": "A family favorite."},
+    )
+    assert response.status_code == 200
+    recipe = response.get_json()
+    assert recipe["rating_count"] == 1
+    assert recipe["rating_average"] == 5
+    assert recipe["my_rating"] == 5
+    assert recipe["my_review"] == "A family favorite."
+    assert len(recipe["reviews"]) == 1
+    assert recipe["reviews"][0]["user"]["username"] == "testuser"
+
+    response = user_client_with_household.post(
+        f"/api/recipe/{recipe_id}/review",
+        json={"rating": 3, "review": "Still good with less salt."},
+    )
+    assert response.status_code == 200
+    recipe = response.get_json()
+    assert recipe["rating_count"] == 1
+    assert recipe["rating_average"] == 3
+    assert recipe["my_rating"] == 3
+
+    response = user_client_with_household.delete(f"/api/recipe/{recipe_id}/review")
+    assert response.status_code == 200
+    recipe = response.get_json()
+    assert recipe["rating_count"] == 0
+    assert recipe["rating_average"] == 0
+    assert recipe["my_rating"] is None
+    assert recipe["reviews"] == []
+
+
+def test_recipe_review_rejects_invalid_rating(
+    user_client_with_household, recipe_with_items
+):
+    response = user_client_with_household.post(
+        f"/api/recipe/{recipe_with_items}/review",
+        json={"rating": 6},
+    )
+    assert response.status_code == 422
