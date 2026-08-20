@@ -37,7 +37,7 @@ class RecipeReview(Model):
         index=True,
     )
     rating: Mapped[int] = db.Column(db.Integer, nullable=False)
-    review: Mapped[str] = db.Column(db.String(2000), nullable=False, default="")
+    review: Mapped[str] = db.Column(db.Text(), nullable=False, default="")
 
     recipe: Mapped["Recipe"] = cast(
         Mapped["Recipe"],

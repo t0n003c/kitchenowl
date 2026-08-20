@@ -136,6 +136,43 @@ def test_recipe_review_create_update_and_delete(
     assert recipe["reviews"] == []
 
 
+def test_recipe_review_accepts_rich_text(
+    user_client_with_household, recipe_with_items
+):
+    recipe_id = recipe_with_items
+    rich_review = (
+        'kitchenowl-richtext:v1:'
+        '[{"insert":"A rich review\\n","attributes":{"bold":true}}]'
+    )
+
+    response = user_client_with_household.post(
+        f"/api/recipe/{recipe_id}/review",
+        json={"rating": 5, "review": rich_review},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["my_review"] == rich_review
+
+
+def test_recipe_review_rejects_rich_text_over_visible_limit(
+    user_client_with_household, recipe_with_items
+):
+    import json
+
+    recipe_id = recipe_with_items
+    rich_review = (
+        'kitchenowl-richtext:v1:'
+        + json.dumps([{"insert": "x" * 2001 + "\\n"}])
+    )
+
+    response = user_client_with_household.post(
+        f"/api/recipe/{recipe_id}/review",
+        json={"rating": 5, "review": rich_review},
+    )
+
+    assert response.status_code == 400
+
+
 def test_recipe_review_rejects_invalid_rating(
     user_client_with_household, recipe_with_items
 ):

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:kitchenowl/config.dart';
 import 'package:kitchenowl/cubits/auth_cubit.dart';
@@ -223,6 +224,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                       AppLocalizations.localizationsDelegates +
                           [
                             LocaleNamesLocalizationsDelegate(),
+                            FlutterQuillLocalizations.delegate,
                           ],
                   supportedLocales:
                       const [Locale('en')] + AppLocalizations.supportedLocales,

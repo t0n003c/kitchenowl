@@ -6,12 +6,17 @@ Each member can keep one review per recipe and can update or remove it later.
 ## What is stored
 
 - A rating from 1 to 5 stars
-- An optional review of up to 2,000 characters
+- An optional rich-text review of up to 2,000 visible characters
 - The author and creation/update timestamps
 
 The recipe detail view shows the household average, number of ratings, and the
 individual reviews. Recipe cards show the average when a recipe has at least
 one rating.
+
+Reviews and recipe descriptions use a preview-style editor with headings,
+font family and size, text and highlight colors, bold, italic, numbered lists,
+and bulleted lists. Existing Markdown descriptions remain readable and are
+converted to rich text when edited.
 
 ## Privacy and access
 

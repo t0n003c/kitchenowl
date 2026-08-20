@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:kitchenowl/kitchenowl.dart';
+import 'package:kitchenowl/helpers/rich_text_document.dart';
 import 'package:kitchenowl/models/recipe.dart';
 import 'package:kitchenowl/models/recipe_review.dart';
 import 'package:kitchenowl/services/api/api_service.dart';
+import 'package:kitchenowl/widgets/rich_text_editor.dart';
+import 'package:kitchenowl/widgets/rich_text_preview.dart';
 
 class RecipeReviews extends StatelessWidget {
   final Recipe recipe;
@@ -152,7 +155,9 @@ class _ReviewTile extends StatelessWidget {
           ),
           if (review.review.trim().isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(review.review),
+            RichTextDocument.isRichText(review.review)
+                ? RichTextPreview(value: review.review)
+                : Text(review.review),
           ],
         ],
       ),
@@ -211,14 +216,7 @@ class _RecipeReviewDialog extends StatefulWidget {
 
 class _RecipeReviewDialogState extends State<_RecipeReviewDialog> {
   late int rating = widget.rating;
-  late final TextEditingController controller =
-      TextEditingController(text: widget.review);
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  late String review = widget.review;
 
   @override
   Widget build(BuildContext context) {
@@ -246,15 +244,11 @@ class _RecipeReviewDialogState extends State<_RecipeReviewDialog> {
                 );
               }),
             ),
-            TextField(
-              controller: controller,
-              maxLines: 4,
-              maxLength: 2000,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText: localizations.recipeReviewHint,
-                labelText: localizations.recipeReview,
-              ),
+            RichTextEditor(
+              value: review,
+              editorHeight: 180,
+              placeholder: localizations.recipeReviewHint,
+              onChanged: (value) => review = value,
             ),
           ],
         ),
@@ -277,7 +271,7 @@ class _RecipeReviewDialogState extends State<_RecipeReviewDialog> {
               : () => Navigator.of(context).pop(
                     _RecipeReviewResult(
                       rating: rating,
-                      review: controller.text.trim(),
+                      review: review,
                     ),
                   ),
           child: Text(localizations.save),

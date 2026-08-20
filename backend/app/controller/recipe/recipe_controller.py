@@ -1,12 +1,13 @@
 import re
 from sqlalchemy import desc, func
 from app.config import FRONT_URL
-from app.errors import NotFoundRequest
+from app.errors import InvalidUsage, NotFoundRequest
 from app.models import Household, RecipeItems, RecipeTags, RecipeReview
 from flask import jsonify, Blueprint
 from flask_jwt_extended import current_user, jwt_required
 from app import db
 from app.helpers import validate_args, authorize_household
+from app.helpers.rich_text import MAX_REVIEW_PLAIN_TEXT_LENGTH, plain_text_length
 from app.models import Recipe, Item, Tag
 from app.models.recipe import RecipeVisibility
 from app.service.file_has_access_or_download import file_has_access_or_download
@@ -220,6 +221,13 @@ def addOrUpdateRecipeReview(args, id):
     if not recipe:
         raise NotFoundRequest()
     recipe.checkAuthorized()
+
+    try:
+        review_length = plain_text_length(args["review"])
+    except ValueError as exc:
+        raise InvalidUsage("Invalid rich text review") from exc
+    if review_length > MAX_REVIEW_PLAIN_TEXT_LENGTH:
+        raise InvalidUsage("Review is too long")
 
     review = RecipeReview.query.filter_by(
         recipe_id=recipe.id,
