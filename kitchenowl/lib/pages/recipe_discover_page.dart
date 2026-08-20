@@ -200,6 +200,33 @@ class _RecipeDiscoverPageState extends State<RecipeDiscoverPage> {
                       ),
                     ),
                   ),
+                  if (state.personalized.isNotEmpty)
+                    SliverCrossAxisConstrained(
+                      maxCrossAxisExtent: 1600,
+                      child: SliverRecipeCarousel(
+                        recipes: state.personalized,
+                        title:
+                            "${AppLocalizations.of(context)!.recipesForYou}:",
+                        alwaysShowMoreAction: false,
+                        limit: getValueForScreenType(
+                          context: context,
+                          mobile: 5,
+                          tablet: 5,
+                          desktop: 10,
+                        ),
+                        showMore: () =>
+                            Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                            builder: (context) => RecipeListDisplayPage(
+                              title: AppLocalizations.of(context)!
+                                  .recipesForYou,
+                              household: widget.household,
+                              recipes: state.personalized,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   if (state.discover.curated.isNotEmpty)
                     SliverCrossAxisConstrained(
                       maxCrossAxisExtent: 1600,

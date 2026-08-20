@@ -136,10 +136,25 @@ class _PlannerPageState extends State<PlannerPage> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                AppLocalizations.of(context)!.plannerTitle,
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)!.plannerTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall,
+                                  ),
+                                  if (state.recipePlans.isNotEmpty)
+                                    Text(
+                                      AppLocalizations.of(context)!
+                                          .plannerSummary(state.recipePlans.length),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                ],
                               ),
                             ),
                             if (state.recipePlans.isNotEmpty &&
@@ -159,19 +174,49 @@ class _PlannerPageState extends State<PlannerPage> {
                   ),
                   if (state.recipePlans.isEmpty)
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.no_food_rounded),
-                            const SizedBox(height: 16),
-                            Text(
-                              AppLocalizations.of(context)!.plannerEmpty,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                      child: Card(
+                        margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.calendar_month_rounded,
+                                size: 42,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSecondaryContainer,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                AppLocalizations.of(context)!.plannerEmpty,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                    ),
+                              ),
+                              if (!App.isOffline) ...[
+                                const SizedBox(height: 16),
+                                FilledButton.icon(
+                                  onPressed: () => context.push(
+                                    "/household/${cubit.household.id}/recipes/discover",
+                                    extra: cubit.household,
+                                  ),
+                                  icon: const Icon(Icons.auto_awesome_rounded),
+                                  label: Text(AppLocalizations.of(context)!
+                                      .recipesDiscover),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -373,7 +418,7 @@ class _PlannerPageState extends State<PlannerPage> {
                         ),
                       ),
                     ),
-                  if (!App.isOffline)
+                  if (!App.isOffline && state.recipePlans.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
                       sliver: SliverToBoxAdapter(
@@ -384,7 +429,8 @@ class _PlannerPageState extends State<PlannerPage> {
                           ),
                           icon: const Icon(Icons.auto_awesome_rounded),
                           label: Text(
-                              AppLocalizations.of(context)!.recipesDiscover),
+                            AppLocalizations.of(context)!.recipesDiscover,
+                          ),
                         ),
                       ),
                     ),

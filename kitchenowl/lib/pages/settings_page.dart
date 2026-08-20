@@ -191,6 +191,45 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
+                ListTile(
+                  title: Text(AppLocalizations.of(context)!.textSize),
+                  leading: const Icon(Icons.format_size_rounded),
+                  titleAlignment: ListTileTitleAlignment.top,
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SegmentedButton<double>(
+                        selected: {state.textScale},
+                        segments: [
+                          ButtonSegment(
+                            value: 0.85,
+                            label: Text(
+                                AppLocalizations.of(context)!.textSizeSmall),
+                          ),
+                          ButtonSegment(
+                            value: 1.0,
+                            label: Text(
+                                AppLocalizations.of(context)!.defaultWord),
+                          ),
+                          ButtonSegment(
+                            value: 1.15,
+                            label: Text(
+                                AppLocalizations.of(context)!.textSizeLarge),
+                          ),
+                          ButtonSegment(
+                            value: 1.3,
+                            label: Text(AppLocalizations.of(context)!
+                                .textSizeExtraLarge),
+                          ),
+                        ],
+                        onSelectionChanged: (value) =>
+                            BlocProvider.of<SettingsCubit>(context)
+                                .setTextScale(value.first),
+                      ),
+                    ),
+                  ),
+                ),
                 DynamicColorBuilder(builder: (dynamicLight, dynamicDark) {
                   if (dynamicLight != null && dynamicDark != null) {
                     return ListTile(

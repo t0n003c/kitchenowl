@@ -22,9 +22,9 @@ abstract class AppThemes {
     onPrimary: Colors.white,
     onSecondary: Colors.white,
     onTertiary: Colors.white,
-    surface: Colors.grey[850],
+    surface: Color(0xFF111512),
     // ignore: deprecated_member_use
-    background: Colors.grey[850],
+    background: Color(0xFF111512),
     brightness: Brightness.dark,
   );
 
@@ -89,10 +89,12 @@ abstract class AppThemes {
       colorScheme: colorScheme,
       useMaterial3: true,
     ).copyWith(
+      scaffoldBackgroundColor: colorScheme.surface,
       cardTheme: CardThemeData(
         clipBehavior: Clip.antiAlias,
         elevation: 0,
-        color: colorScheme.surfaceBright,
+        color: colorScheme.surfaceContainerLow,
+        surfaceTintColor: colorScheme.surfaceTint,
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: colorScheme.surface,
@@ -105,11 +107,34 @@ abstract class AppThemes {
         color: colorScheme.surface,
         surfaceTintColor: colorScheme.surface,
       ),
+      dividerTheme: DividerThemeData(
+        color: colorScheme.outlineVariant.withAlpha(150),
+        space: 1,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colorScheme.surfaceContainerHigh,
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colorScheme.surfaceContainerLow,
+        modalBackgroundColor: colorScheme.surfaceContainerLow,
+      ),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: colorScheme.onSurfaceVariant,
-          backgroundColor: colorScheme.surfaceBright,
+          backgroundColor: colorScheme.surfaceContainerHigh,
           elevation: 0,
         ),
       ),

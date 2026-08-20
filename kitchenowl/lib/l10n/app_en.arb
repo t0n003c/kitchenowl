@@ -700,6 +700,14 @@
   "planner": "Planner",
   "plannerEmpty": "No meals planned, start by selecting one of your recipes!",
   "plannerTitle": "Your planned meals",
+  "plannerSummary": "{count, plural, =1{1 meal planned} other{{count} meals planned}}",
+  "@plannerSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "preparationTime": "Preparation time",
   "privacyPolicy": "Privacy policy",
   "privacyPolicyAgree": "By creating an account you agree to our {privacyPolicy} and {terms}",
@@ -750,6 +758,7 @@
   "recipes": "Recipes",
   "recipesCurated": "Curated recipes",
   "recipesDiscover": "Discover recipes",
+  "recipesForYou": "Picked for your household",
   "recipesNewestCommunity": "Newest community recipes",
   "recipesOverwrite": "Overwrite recipes",
   "recipesOverwriteDescription": "If activated, existing recipes with the same name will be overwritten",
@@ -807,6 +816,10 @@
   "tagsPopular": "Popular tags",
   "tap": "Tap",
   "terms": "Terms & Conditions",
+  "textSize": "Text size",
+  "textSizeSmall": "Small",
+  "textSizeLarge": "Large",
+  "textSizeExtraLarge": "Extra large",
   "themeDark": "Dark",
   "themeLight": "Light",
   "themeMode": "Theme",
